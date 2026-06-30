@@ -2,8 +2,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const ErrorApi = require("../utils/ErrorApi");
 const STATUS_CODES = require("../utils/StatusCode")
-const {FindUserRepository , CreateUserRepository} = require('../repository/User.repository');
+const {FindUserRepository , CreateUserRepository, UpdateUserRepository} = require('../repository/User.repository');
 const { CreateBlackListTokenRepository } = require("../repository/BlackListToken.repository");
+const cloudinaryService = require("../config/Cloudniry");
 
 
 const UserRegisterService = async(body) => {
@@ -64,7 +65,7 @@ const UserLogoutService = async ({userId , password , token}) => {
 
     const exitUser = await FindUserRepository({id : userId})
     const passwordVerify = await bcrypt.compare(password ,exitUser.password )
-
+    
     if(!passwordVerify) throw new ErrorApi("Wrong password", STATUS_CODES.FORBIDDEN);
 
     const blackListToken  = await CreateBlackListTokenRepository({tokens :token})
@@ -85,10 +86,30 @@ const UserGetMeService = async ({id}) => {
     return !!exitUser
 }
 
+const UserUpdateSerice = async ({userId , body, profileImage}) => {
+    const {name} = body;
+    
+    const data = {}
+    let img ;
+
+    if(profileImage){
+        img = await cloudinaryService({data : profileImage, folders : "profilepic"})
+    }
+
+    if(name) data.name = name;
+    if(profileImage) data.profileImage = img.url;
+
+    const update = await UpdateUserRepository({id : userId, update : data});
+
+    if(!update) throw new ErrorApi("update failed");
+
+    return true
+}
 
 module.exports = {
     UserRegisterService,
     UserLoginService,
     UserLogoutService,
-    UserGetMeService
+    UserGetMeService,
+    UserUpdateSerice
 }

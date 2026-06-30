@@ -15,6 +15,7 @@ const AuthMiddleWare = async (req ,res , next) => {
 
         const exitBlacklistToken = await FindBlackListTokenRepository({tokens : token});
 
+    
 
         if(exitBlacklistToken) throw new ErrorApi("Unauthrized", STATUS_CODES.UNAUTHORIZED);
 

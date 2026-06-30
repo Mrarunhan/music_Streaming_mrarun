@@ -1,62 +1,47 @@
-const User = require('../models/User.model');
+const { User } = require("../models/User.model");
 
+const FindUserRepository = async ({ username, email, id }) => {
+  const exitUser = await User.findOne({
+    $or: [{ username: username }, { email: email }, { _id: id }],
+  });
 
-const FindUserRepository = async ({username, email , id}) => {
-    const exitUser = await User.findOne(
-        {$or : [
-            {username : username},
-            {email : email},
-            {_id : id}
-        ]}
-    )
+  return exitUser;
+};
 
-    return exitUser;
-}
+const CreateUserRepository = async ({ name, username, email, password }) => {
+  const user = await User.create({
+    name: name,
+    username: username,
+    email: email,
+    password: password,
+  });
 
-const CreateUserRepository = async ({name , username , email, password}) => {
+  return user;
+};
 
+const UpdateUserRepository = async ({ update, id }) => {
+ 
+  const updatesUser = await User.findOneAndUpdate(
+    { _id: id },
 
-    const user = await User.create({
-        name : name,
-        username : username,
-        email : email,
-        password : password,
-    })
+    update,
+    { new: true },
+  );
 
-    return user
-}
+  
 
+  return updatesUser;
+};
 
-
-
-
-const UpdateUserRepository = async (update , username , email) => {
-
-    const updatesUser =  await User.findOneAndUpdate(
-        {$or : [
-            {username : username},
-            {email : email}
-        ]},
-        {update}
-    )
-
-    return !!updatesUser
-}
-
-
-
-const DeleteUserRepository = async ({username , email}) => {
-    const user = await User.deleteOne({
-        $or :  [
-            {username :  username},
-            {email : email}
-        ]
-    })
-}
+const DeleteUserRepository = async ({ username, email }) => {
+  const user = await User.deleteOne({
+    $or: [{ username: username }, { email: email }],
+  });
+};
 
 module.exports = {
-    FindUserRepository,
-    CreateUserRepository,
-    UpdateUserRepository,
-    DeleteUserRepository
-}
+  FindUserRepository,
+  CreateUserRepository,
+  UpdateUserRepository,
+  DeleteUserRepository,
+};
